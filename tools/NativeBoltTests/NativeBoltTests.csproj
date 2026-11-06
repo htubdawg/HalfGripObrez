@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings>
+    <ManagedDir>$(GameDir)/HalfGrip_Data/Managed</ManagedDir>
+  </PropertyGroup>
+  <Target Name="RequireGame" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(ManagedDir)/Assembly-CSharp.dll')" Text="Set GameDir to your local Half Grip reference folder. No game DLLs are included in the repository." />
+  </Target>
+  <ItemGroup>
+    <Compile Include="../../Obrez/src/BoltControl.cs" Link="BoltControl.cs" />
+    <Reference Include="$(ManagedDir)/*.dll" Exclude="$(ManagedDir)/mscorlib.dll;$(ManagedDir)/netstandard.dll;$(ManagedDir)/System*.dll" />
+  </ItemGroup>
+</Project>
