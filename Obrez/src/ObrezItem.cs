@@ -25,6 +25,12 @@ namespace HalfGripObrez
                 Mod.Context.Log.LogError("Cannot register Mosin Obrez: the catalog has no SMG item.");
                 return null;
             }
+            // Use each distinct built-in gun sprite once; upgrade tiers that share an
+            // image must not skew the result. Measure the exact rect/PPU ratio that
+            // Unity UI uses, rather than mesh bounds or assumed screen/canvas pixels.
+            Sprite[] nativeIcons = catalog.items.OfType<GunUpgrade>()
+                .Where(g => g && g.id != Id && g.image && (g.hideFlags & HideFlags.DontSave) == 0)
+                .Select(g => g.image).Distinct().ToArray();
             GunUpgrade revolver = catalog.items.OfType<GunUpgrade>().FirstOrDefault(g => g && g.gunType == GunType.REVOLVER) ?? basis;
             item = Mod.Context.Items.Clone(basis, Id);
             item.name = "Mosin Obrez";
@@ -52,14 +58,19 @@ namespace HalfGripObrez
             Texture2D texture = Mod.Context.Sprites.LoadTexture("obrez_icon.png");
             if (texture)
             {
-                // The garage calls Image.SetNativeSize, which uses sprite bounds/PPU.
-                // The garage gets its own coarse sprite and a stable, readable UI size,
-                // independent of cockpit texture detail and the catalog's SMG variant.
-                float ppu = PresentationMath.FitPixelDensity(texture.width, texture.height,
-                    PresentationMath.GarageWidth, PresentationMath.GarageHeight);
-                icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), ppu);
-                icon.name = "obrez_shop_icon";
-                item.image = icon;
+                float[] nativeWidths = nativeIcons.Select(s => s.rect.width / s.pixelsPerUnit).ToArray();
+                float[] nativeHeights = nativeIcons.Select(s => s.rect.height / s.pixelsPerUnit).ToArray();
+                float ppu = PresentationMath.NativeIconPixelDensity(texture.width, texture.height, nativeWidths, nativeHeights);
+                if (ppu > 0f)
+                {
+                    icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), ppu);
+                    icon.name = "obrez_shop_icon";
+                    item.image = icon;
+                    Mod.Context.Log.LogInfo($"Obrez garage icon: {nativeIcons.Length} distinct native gun references, " +
+                        $"target rect/PPU={PresentationMath.MedianPositive(nativeWidths):0.####}x{PresentationMath.MedianPositive(nativeHeights):0.####}, " +
+                        $"actual={texture.width / ppu:0.####}x{texture.height / ppu:0.####}");
+                }
+                else Mod.Context.Log.LogError("Obrez icon has no valid native sizing references; keeping the stock gun icon.");
             }
             return item;
         }

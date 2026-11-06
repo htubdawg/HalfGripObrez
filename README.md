@@ -1,6 +1,6 @@
 # Mosin Obrez for Half Grip
 
-A cut-down Mosin-Nagant with **individual cartridges, a five-round internal magazine, and a bolt the player opens and closes by hand**. Version **0.2.3** fixes the stock SMG magazine image reappearing after firing/lowering, and replaces the rejected gun drawing with a curved stock profile, restrained walnut shading, a cylindrical bolt, and a smaller rounded magazine/trigger guard. The revision still needs in-game playtesting.
+A cut-down Mosin-Nagant with **individual cartridges, a five-round internal magazine, and a bolt the player opens and closes by hand**. Version **0.2.4** removes the hardcoded garage icon dimensions and sizes it from the game's actual built-in gun sprites. The earlier fixed sizing confused canvas units with screen pixels. The revision still needs in-game playtesting.
 
 ![Generated Mosin artwork and cartridge](docs/artwork.png)
 
@@ -34,7 +34,9 @@ Partial bolt travel neither exposes the loading gate nor chambers a round. Closi
 
 ## Scaling and artwork
 
-The garage uses a separately drawn **64×24** pixel sprite with broad shapes and a limited palette. Its native UI size is **160×60** pixels at the game's standard canvas reference density. It is not a resized cockpit/held texture and no longer depends on the size of a catalog SMG variant.
+The garage uses a separately drawn **64×24** sprite. Its displayed size is fitted to the median natural width and height of the game's distinct built-in gun icons. Upgrades sharing an image count once, and runtime mod clones are excluded.
+
+Sizing uses the same `sprite.rect.size / sprite.pixelsPerUnit` ratio as Unity's `Image.SetNativeSize`. Canvas reference density and screen scaling then affect the native icons and the Obrez equally. There are no assumed screen-pixel dimensions or assumed canvas reference density. If no valid native references exist, the stock gun icon is retained instead of choosing a guessed size. The selected target and resulting natural size are written to the BepInEx log.
 
 Docked length is measured from the stock gun's actual world-space width. Body, bolt, and cartridge sprites get separate pixel densities that account for their own cockpit transforms. A cartridge's height is 17% of the docked gun's length; it does not inherit the size of the old SMG magazine. Cartridge hit areas are also resized. The bolt's travel is 14% of gun length along the barrel axis. Its cylinder, handle and cocking piece form one moving sprite; the grab collider is centred on that sprite. Hand motion stays unfrozen, with zero springs and zero release momentum.
 
@@ -73,7 +75,7 @@ python3 tools/make_assets.py
 python3 tools/package.py
 ```
 
-The package is `dist/HalfGripObrez-0.2.3.zip`. It contains the installable source mod and documentation, with no game assemblies.
+The package is `dist/HalfGripObrez-0.2.4.zip`. It contains the installable source mod and documentation, with no game assemblies.
 
 Compile with .NET 8 and local private references:
 

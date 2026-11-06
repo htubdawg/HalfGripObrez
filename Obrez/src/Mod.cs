@@ -27,7 +27,7 @@ namespace HalfGripObrez
                 new ConfigDescription("Docked gun length relative to the stock SMG. Cartridges and bolt use the same physical scale.", new AcceptableValueRange<float>(0.5f, 1.5f)));
             ctx.Items.Add(ObrezItem.Id, ObrezItem.Create);
             ctx.PatchAll();
-            ctx.Log.LogInfo("Mosin Obrez 0.2.3 loaded: five-shot supply and manual bolt.");
+            ctx.Log.LogInfo("Mosin Obrez 0.2.4 loaded: five-shot supply and manual bolt.");
         }
 
         public override void Unload()

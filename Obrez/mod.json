@@ -1,9 +1,9 @@
 {
   "id": "obrez",
   "name": "Mosin Obrez",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": "Codex - Oretsej",
-  "description": "Mosin Obrez with redrawn walnut stock and steel action, separate garage art, five individual cartridges and a manual bolt. Fixes SMG magazine art reappearing after firing.",
+  "description": "Five-shot Mosin Obrez with a manual bolt and individual rounds. Garage icon now sizes relative to real native gun sprites, including canvas scaling.",
   "gameVersion": "0.419",
   "tools": "1.0.6"
 }

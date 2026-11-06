@@ -48,16 +48,34 @@ Check(interrupted.ReserveRound(), "Open receiver must reserve a round");
 Move(interrupted, 0f);
 Check(!interrupted.FinishRound(false) && interrupted.LiveRounds == 0, "Closing during insertion must leave the physical round unconsumed");
 Check(!interrupted.PendingRound, "Interrupted insertion must release the reservation");
-// Garage icon uses Image.SetNativeSize; PNG resolution must not change its displayed footprint.
-float ppu = PresentationMath.FitPixelDensity(160, 80, 15, 9);
-Check(160 / ppu <= 15.001f && 80 / ppu <= 9.001f, "Garage icon must fit both stock footprint dimensions");
-float denser = PresentationMath.FitPixelDensity(320, 160, 15, 9);
-Check(Math.Abs(320 / denser - 160 / ppu) < 0.001f, "A denser icon must not grow in the garage");
+// Mirror Unity Image.SetNativeSize's real coordinate conversion, including canvas
+// reference PPU and screen scale. The Obrez must stay inside native gun dimensions
+// at every setting; it must not use screen pixels as canvas units.
+float[] nativeWidths = [0.24f, 0.48f, 0.22f, 0.64f];
+float[] nativeHeights = [0.10f, 0.16f, 0.14f, 0.22f];
+float medianWidth = PresentationMath.MedianPositive(nativeWidths);
+float medianHeight = PresentationMath.MedianPositive(nativeHeights);
+float iconPpu = PresentationMath.NativeIconPixelDensity(64, 24, nativeWidths, nativeHeights);
+Check(Math.Abs(medianWidth - 0.36f) < 0.0001f, "Even native icon populations need the correct midpoint");
+Check(PresentationMath.MedianPositive([0f, float.NaN, float.PositiveInfinity, 0.3f]) == 0.3f, "Invalid native sizes must be ignored");
+Check(PresentationMath.NativeIconPixelDensity(64, 24, [], []) == 0f, "Missing native sizes must not invent a giant fallback");
+foreach (float canvasReferencePpu in new[] { 1f, 10f, 100f, 1000f })
+foreach (float canvasScale in new[] { 0.5f, 1f, 2f, 4f, 8f })
+{
+    float renderedWidth = 64 / (iconPpu / canvasReferencePpu) * canvasScale;
+    float renderedHeight = 24 / (iconPpu / canvasReferencePpu) * canvasScale;
+    Check(renderedWidth <= medianWidth * canvasReferencePpu * canvasScale + 0.001f,
+        "Garage icon width must not exceed the actual native median at any canvas scale");
+    Check(renderedHeight <= medianHeight * canvasReferencePpu * canvasScale + 0.001f,
+        "Garage icon height must not exceed the actual native median at any canvas scale");
+}
+float doubleResolutionPpu = PresentationMath.NativeIconPixelDensity(128, 48, nativeWidths, nativeHeights);
+Check(Math.Abs(128 / doubleResolutionPpu - 64 / iconPpu) < 0.0001f, "Texture resolution must not change garage size");
+// The reported four-times-size bug: old 1.6 sprite units became 640 screen pixels
+// on a 100 reference-PPU canvas scaled by four. Matching native sprites yields 144.
+Check(Math.Abs(64 / (iconPpu / 100) * 4 - 144) < 0.01f, "Canvas scaling regression must fit native gun sizes instead of 640px");
 Check(PresentationMath.NearReceiver(500, 300, 2, 500, 300, 8, 200), "Round and receiver at different depths must load when visually aligned");
 Check(!PresentationMath.NearReceiver(550, 300, 2, 500, 300, 8, 200), "A visibly distant round must not load");
 Check(!PresentationMath.NearReceiver(500, 300, -1, 500, 300, 8, 200), "A round behind the camera must not load");
-float garagePpu = PresentationMath.FitPixelDensity(64, 24, PresentationMath.GarageWidth, PresentationMath.GarageHeight);
-Check(Math.Abs(64 / garagePpu * 100 - 160) < 0.01f, "Independent 64px garage art must display at readable 160px width");
-Check(Math.Abs(24 / garagePpu * 100 - 60) < 0.01f, "Garage icon must fit a 60px high inventory row");
 Console.WriteLine($"PASS: {assertions} assertions: manual travel, open-bolt loading, five-round capacity, no auto-feed, and case ejection.");
 if (args.Length > 0) GameContracts.Check(args[0]);
