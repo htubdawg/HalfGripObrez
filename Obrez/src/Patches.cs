@@ -2,8 +2,19 @@ using HarmonyLib;
 
 namespace HalfGripObrez
 {
-    // Garage refits can reuse an already-awake SMG assembly. Restore before its sprite refresh,
-    // then install after the refit, so switching back to an ordinary SMG restores its behavior.
+    // Any equipment refit refreshes all native sprites, even when the gun item did not change.
+    [HarmonyPatch(typeof(SpriteUpgradeChanger), "Refresh")]
+    internal static class SpriteRefreshPatch
+    {
+        private static void Postfix(SpriteUpgradeChanger __instance)
+        {
+            if (!ObrezItem.IsEquipped) return;
+            var renderer = __instance.GetComponent<UnityEngine.SpriteRenderer>();
+            if (!renderer) return;
+            __instance.GetComponentInParent<ObrezGun>(true)?.Visuals?.Reapply(renderer);
+            __instance.GetComponentInParent<ObrezRound>(true)?.Reapply(renderer);
+        }
+    }
     [HarmonyPatch(typeof(LoadoutRefit), "Swap")]
     internal static class RefitPatch
     {
@@ -17,7 +28,6 @@ namespace HalfGripObrez
             if (__state) Mod.InstallSceneParts();
         }
     }
-
     [HarmonyPatch(typeof(NAutomaticGun), "Awake")]
     internal static class InstallPatch
     {
@@ -27,9 +37,25 @@ namespace HalfGripObrez
                 __instance.gameObject.AddComponent<ObrezGun>().Initialize(__instance);
         }
     }
-
-    // Keep the game's damage, stats, raycast, networking signals, effects and ammo consumption.
-    // Suppress only its immediate post-shot feed; closing the bolt still calls the same feed normally.
+    [HarmonyPatch(typeof(MagazineManager), "Awake")]
+    internal static class RackPatch
+    {
+        private static void Prefix(MagazineManager __instance)
+        {
+            if (ObrezItem.IsEquipped) ObrezAmmo.ConvertRack(__instance);
+        }
+    }
+    [HarmonyPatch(typeof(NAutomaticGun), "UpdateSlide")]
+    internal static class BoltPatch
+    {
+        private static bool Prefix(NAutomaticGun __instance)
+        {
+            ObrezGun obrez = __instance.GetComponent<ObrezGun>();
+            if (!obrez) return true;
+            obrez.UpdateBolt();
+            return false;
+        }
+    }
     [HarmonyPatch(typeof(NAutomaticGun), "Shoot")]
     internal static class ShotPatch
     {
@@ -38,31 +64,35 @@ namespace HalfGripObrez
             __state = __instance.GetComponent<ObrezGun>();
             return !__state || __state.BeginShot();
         }
-
         private static void Finalizer(ObrezGun __state, System.Exception __exception)
         {
             if (__state) __state.EndShot(__exception == null);
         }
     }
-
     [HarmonyPatch(typeof(NAutomaticGun), "TryChamber")]
     internal static class FeedPatch
     {
         private static bool Prefix(NAutomaticGun __instance, ref bool __result)
         {
-            ObrezGun obrez = __instance.GetComponent<ObrezGun>();
-            if (!obrez || !obrez.InShot) return true;
+            if (!__instance.GetComponent<ObrezGun>()) return true;
             __result = false;
             return false;
         }
     }
-
-    [HarmonyPatch(typeof(NAutomaticGun), "OnSlidePulled")]
-    internal static class EjectPatch
+    [HarmonyPatch(typeof(NAutomaticGun), "ShotsLeft")]
+    internal static class AmmoCountPatch
     {
-        private static void Postfix(NAutomaticGun __instance)
+        private static bool Prefix(NAutomaticGun __instance, ref int __result)
         {
-            __instance.GetComponent<ObrezGun>()?.EjectCase();
+            ObrezGun obrez = __instance.GetComponent<ObrezGun>();
+            if (!obrez) return true;
+            __result = obrez.Action.LiveRounds;
+            return false;
         }
+    }
+    [HarmonyPatch(typeof(NAutomaticGun), "RegisterTutorial")]
+    internal static class TutorialPatch
+    {
+        private static bool Prefix(NAutomaticGun __instance) => !__instance.GetComponent<ObrezGun>();
     }
 }

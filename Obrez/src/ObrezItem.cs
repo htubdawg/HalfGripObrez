@@ -22,7 +22,7 @@ namespace HalfGripObrez
             GunUpgrade revolver = catalog.items.OfType<GunUpgrade>().FirstOrDefault(g => g && g.gunType == GunType.REVOLVER) ?? basis;
             item = Mod.Context.Items.Clone(basis, Id);
             item.name = "Mosin Obrez";
-            item.description = "Mosin Obrez\n<color=#7e7e7e>Short rifle. Long argument.</color>\n<color=#6fb7b4>Cycle the bolt after every shot</color>\n<color=#6fb7b4>5 rounds / heavy recoil / no scope</color>";
+            item.description = "Mosin Obrez\n<color=#7e7e7e>A rifle cut down to the essentials.</color>\n<color=#6fb7b4>Load individual rounds with the bolt open</color>\n<color=#6fb7b4>Push the bolt closed to chamber / 5 rounds</color>";
             item.secondaryDescription = "";
             item.tier = ItemTier.RaceSpec;
             item.cost = Mathf.Max(basis.cost, revolver.cost) * 2;
@@ -33,7 +33,7 @@ namespace HalfGripObrez
             item.inaccuracy = Mod.Inaccuracy.Value;
             item.fireRate = 1.25f;
             item.capacity = 5;
-            item.magazines = Mod.Packs.Value;
+            item.magazines = Mod.Rounds.Value;
             item.projectilesPerShot = 1;
             item.projectileSpread = 0f;
             item.ammoWord = "round|rounds";

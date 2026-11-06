@@ -1,9 +1,9 @@
 {
   "id": "obrez",
   "name": "Mosin Obrez",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Codex - Oretsej",
-  "description": "A compact bolt-action Mosin with five-round loading packs, heavy recoil, and code-generated artwork. Prototype: pull the bolt after every shot.",
+  "description": "A cut-down Mosin with a manually opened and closed bolt, an internal five-round magazine, and individual cartridges. Code-generated Mosin artwork and matched cockpit scaling.",
   "gameVersion": "0.419",
   "tools": "1.0.6"
 }
