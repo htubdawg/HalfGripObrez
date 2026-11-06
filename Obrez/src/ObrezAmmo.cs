@@ -37,7 +37,7 @@ namespace HalfGripObrez
             Vector3 direction = end - start;
             Vector3 centre = (start + end) * 0.5f;
             float width = ObrezPresentation.MeasureWidth(rounds[0].SourceGun) * Mod.DockScale.Value;
-            float span = Mathf.Max(direction.magnitude, width * 0.075f * (count - 1));
+            float span = Mathf.Max(direction.magnitude, width * 0.10f * (count - 1));
             direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : rack.transform.right;
             while (rounds.Count > count)
             {
@@ -174,8 +174,9 @@ namespace HalfGripObrez
             if (!SourceGun || !Loaded) return;
             ObrezGun gun = SourceGun.GetComponent<ObrezGun>();
             float width = gun ? gun.WorldWidth : ObrezPresentation.MeasureWidth(SourceGun) * Mod.DockScale.Value;
-            // A 7.62x54R cartridge is about 12% of this cut-down rifle's length.
-            float height = width * 0.12f;
+            // The reference Obrez is short: a rifle cartridge is substantial beside it.
+            // 0.17 also keeps individual rounds readable in the cockpit (42% taller than 0.2.1).
+            float height = width * 0.17f;
             Loaded.transform.localPosition = Vector3.zero;
             art = ObrezPresentation.SizedSprite("obrez_round.png", Loaded, height, true);
             if (art) Loaded.sprite = art;

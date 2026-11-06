@@ -50,12 +50,13 @@ namespace HalfGripObrez
             item.forceHide = basis.forceHide != null ? new List<string>(basis.forceHide) : new List<string>();
             item.forceHide.Add("fire rate");
             Texture2D texture = Mod.Context.Sprites.LoadTexture("obrez_icon.png");
-            if (texture && basis.image)
+            if (texture)
             {
                 // The garage calls Image.SetNativeSize, which uses sprite bounds/PPU.
-                // Fit inside the stock icon footprint regardless of the PNG resolution.
-                Vector2 size = basis.image.bounds.size;
-                float ppu = PresentationMath.FitPixelDensity(texture.width, texture.height, size.x * 0.75f, size.y * 0.75f);
+                // The garage gets its own coarse sprite and a stable, readable UI size,
+                // independent of cockpit texture detail and the catalog's SMG variant.
+                float ppu = PresentationMath.FitPixelDensity(texture.width, texture.height,
+                    PresentationMath.GarageWidth, PresentationMath.GarageHeight);
                 icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), ppu);
                 icon.name = "obrez_shop_icon";
                 item.image = icon;

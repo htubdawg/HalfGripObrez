@@ -1,4 +1,4 @@
-# Validation for 0.2.1
+# Validation for 0.2.2
 
 ## Changes prompted by 0.1.0 playtesting
 
@@ -12,6 +12,13 @@ The first prototype's loading packs were oversized, its bolt used the SMG return
 - Round/receiver proximity is measured through the Grabber's interior camera. The insertion target uses a camera ray intersecting the cartridge movement plane, preserving on-screen alignment at different cockpit depths.
 - Four/five actual loose-round entities are created before the rack records its slots. Old 15-round config values clamp to five, and the rack rejects extra ammo spawns.
 
+## Art and grip revision after the 0.2.1 playtest
+
+- Independent 64×24 garage artwork, limited detail and palette, with a fixed 160×60 native UI footprint. It no longer reuses the detailed cockpit/held pixels or the previous tiny stock-icon fit.
+- Photo-based continuous wooden fore-end, curved wrist, flared cut butt, front/rear sights, and shallow sloped magazine. The bolt side and manual operation are retained.
+- Padded stock and fore-end aiming zones on the body Grabbable, with higher priority reserved for the bolt. All original collider references and enabled states are restored during cleanup.
+- Dedicated 8×28 cartridge drawing with brass case, shoulder, neck, pointed copper bullet, and smaller relative rim. Display height rises from 12% to 17% of gun length; spacing and hit areas follow the size.
+
 ## Automated checks
 
 - C# 10 / .NET Standard 2.1 compilation against the private Half Grip 0.419 assemblies, BepInEx, Harmony, and HalfGripTools 1.0.6: zero errors and zero warnings.
@@ -22,13 +29,13 @@ The first prototype's loading packs were oversized, its bolt used the SMG return
 - Generated assets are checked for repeatability and valid PNG structure. The preview shows the cartridge at the intended relative scale.
 - Install package integrity and contents checked; no game DLLs or build outputs included.
 
-No Unity/game runtime was available to playtest 0.2.1. Compilation and state tests do not establish cockpit alignment or the behavior of the hand/physics system in the game.
+No Unity/game runtime was available to playtest 0.2.2. Compilation and state tests do not establish cockpit alignment or the behavior of the hand/physics system in the game.
 
 ## In-game checklist
 
-1. Install 0.2.1 with HalfGripTools 1.0.6+ on Half Grip 0.419. Confirm all patches load and `obrez.mosin` appears once. Test an existing Obrez loadout save.
-2. Compare gun, bolt, and cartridge size on several cars. A loose cartridge should be about one eighth of the rifle length. Check the shop icon, bolt hit area, ammo hit areas, and held muzzle alignment.
-3. Pull the bolt fully back and let go. It must remain open. Repeat with a partial pull/release; it must not spring closed or coast. Manually push it fully forward to close.
+1. Install 0.2.2 with HalfGripTools 1.0.6+ on Half Grip 0.419. Confirm all patches load and `obrez.mosin` appears once. Test an existing Obrez loadout save.
+2. In the garage, confirm that the simplified icon fills a useful portion of the gun slot without crowding adjacent items. Compare gun, bolt, and cartridge size on several cars. A loose cartridge should be about one sixth of the rifle length. Check the shop icon, bolt hit area, ammo hit areas, and held muzzle alignment.
+3. With a chambered round, grab different parts of the visible cut stock and fore-end: they should enter aiming mode without pixel hunting. Confirm that directly grabbing the bolt still selects the bolt instead of aiming. Pull the bolt fully back and let go. It must remain open. Repeat with a partial pull/release; it must not spring closed or coast. Manually push it fully forward to close.
 4. With the bolt open, drag a single cartridge into the receiver. It should seat without moving the bolt. Load five; a sixth must remain available outside the gun. Close manually and verify only one round chambers.
 5. Fire five rounds, cycling the bolt manually after every shot. Verify five total shots, one case per full opening, and no automatic feeding or automatic repeated fire.
 6. Close the bolt while a cartridge is animating in; confirm the round is not consumed. Try a partial close, two cartridges in rapid succession, loading with the bolt closed, and loading a full magazine.

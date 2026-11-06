@@ -1,9 +1,9 @@
 {
   "id": "obrez",
   "name": "Mosin Obrez",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Codex - Oretsej",
-  "description": "A five-shot Mosin Obrez with loose cartridges, a hand-operated bolt, and a compact garage icon.",
+  "description": "Photo-referenced Mosin Obrez with a separate low-detail garage icon, broad aiming grips, larger rifle cartridges, five-shot supply and a manual bolt.",
   "gameVersion": "0.419",
   "tools": "1.0.6"
 }

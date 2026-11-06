@@ -1,6 +1,6 @@
 # Mosin Obrez for Half Grip
 
-A cut-down Mosin-Nagant with **individual cartridges, a five-round internal magazine, and a bolt the player opens and closes by hand**. Version **0.2.1** corrects garage icon sizing, bolt grabbing/animation, camera-aligned loading, and the starting ammunition supply. The revision still needs in-game playtesting.
+A cut-down Mosin-Nagant with **individual cartridges, a five-round internal magazine, and a bolt the player opens and closes by hand**. Version **0.2.2** redraws the gun from the supplied reference photo, adds a separate low-detail garage icon, broadens the aiming grip, and enlarges/redraws the cartridges. The revision still needs in-game playtesting.
 
 ![Generated Mosin artwork and cartridge](docs/artwork.png)
 
@@ -27,18 +27,22 @@ Obtain and equip **Mosin Obrez** through the game's gun item/shop system. It is 
 2. Grab an individual cartridge on the ammo rack and bring it to the open receiver, above the internal magazine. It aligns and seats in the gun. Loading proximity and the seating position use the same interior camera as the player's hand, so the different cockpit depths do not offset the target.
 3. Repeat to load up to five rounds. You may also close the bolt after loading fewer rounds.
 4. Grab the bolt again and push it fully toward the muzzle. This chambers one round. Loading does not close the bolt.
-5. Hold the gun body to aim; right-click to fire. The gun lowers after a quarter second so the bolt is accessible.
+5. Hold the cut stock or wooden fore-end to aim; right-click to fire. The gun lowers after a quarter second so the bolt is accessible.
 6. Pull the bolt fully back to eject the spent case, then manually push it closed to feed another round.
 
 Partial bolt travel neither exposes the loading gate nor chambers a round. Closing the bolt during a cartridge's insertion cancels that insertion without consuming the cartridge. Opening a live chamber ejects the live round instead of preserving it; recovering live ejected rounds is not implemented.
 
 ## Scaling and artwork
 
-The garage icon is fitted inside 75% of the stock SMG icon's width and height using explicit pixel density. The game uses `Image.SetNativeSize`; PNG dimensions no longer inflate the inventory footprint. This is separate from cockpit sizing.
+The garage uses a separately drawn **64×24** pixel sprite with broad shapes and a limited palette. Its native UI size is **160×60** pixels at the game's standard canvas reference density. It is not a resized cockpit/held texture and no longer depends on the size of a catalog SMG variant.
 
-Docked length is measured from the stock gun's actual world-space width. Body, bolt, and cartridge sprites get separate pixel densities that account for their own cockpit transforms. A cartridge's height is 12% of the docked gun's length; it does not inherit the size of the old SMG magazine. Cartridge hit areas are also resized. The bolt's travel is 14% of gun length along the barrel axis. Its cylinder, handle and cocking piece form one moving sprite; the grab collider is centred on that sprite. Hand motion stays unfrozen, with zero springs and zero release momentum.
+Docked length is measured from the stock gun's actual world-space width. Body, bolt, and cartridge sprites get separate pixel densities that account for their own cockpit transforms. A cartridge's height is 17% of the docked gun's length; it does not inherit the size of the old SMG magazine. Cartridge hit areas are also resized. The bolt's travel is 14% of gun length along the barrel axis. Its cylinder, handle and cocking piece form one moving sprite; the grab collider is centred on that sprite. Hand motion stays unfrozen, with zero springs and zero release momentum.
 
-The new art has a slim barrel, remaining barrel band and leaf rear sight, faceted receiver ring, exposed bolt body, round cocking piece, straight bolt handle, angled fixed magazine, trigger guard, and a continuous cut rifle wrist. It replaces the first pass's separate pistol grip and rectangular receiver. The held mesh uses the same generated silhouette with its muzzle at the game's fire point.
+The supplied photo guides the thick wooden fore-end, curved wrist, flared cut stock, short barrel/front sight, leaf rear sight, and shallow sloped magazine. The bolt stays on the side used in 0.2.1. Cockpit, held, garage, and cartridge textures have distinct drawing functions; the held texture has its own face highlights.
+
+The aiming grab area covers the visible stock and fore-end with padded colliders, replacing the offset SMG handle area. The moving bolt keeps higher selection priority, so clicking it still operates the action. The body and bolt's original colliders are restored on unload/refit.
+
+Loose rounds are 42% taller than 0.2.1 and have a longer brass case, a defined shoulder/neck, a pointed copper projectile, and a restrained rim. The rack spacing and grab shapes follow their size.
 
 ## Configuration
 
@@ -65,7 +69,7 @@ python3 tools/make_assets.py
 python3 tools/package.py
 ```
 
-The package is `dist/HalfGripObrez-0.2.1.zip`. It contains the installable source mod and documentation, with no game assemblies.
+The package is `dist/HalfGripObrez-0.2.2.zip`. It contains the installable source mod and documentation, with no game assemblies.
 
 Compile with .NET 8 and local private references:
 

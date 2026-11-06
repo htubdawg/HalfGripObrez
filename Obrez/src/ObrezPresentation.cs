@@ -7,7 +7,7 @@ namespace HalfGripObrez
 {
     internal sealed class ObrezPresentation
     {
-        internal const int Width = 128, Height = 40, BoreRow = 12, PortColumn = 85, PortRow = 11;
+        internal const int Width = 128, Height = 48, BoreRow = 12, PortColumn = 62, PortRow = 12;
         private readonly List<(SpriteRenderer renderer, Sprite original, Sprite replacement)> sprites = new();
         private readonly List<(Renderer renderer, bool enabled)> renderers = new();
         private readonly List<Object> owned = new();
@@ -21,6 +21,9 @@ namespace HalfGripObrez
         private Camera interiorCamera;
         private InteriorCollider originalBoltCollider;
         private bool originalBoltColliderEnabled;
+        private Grabbable aimBody;
+        private InteriorCollider originalBodyCollider;
+        private bool originalBodyColliderEnabled;
         private static readonly System.Reflection.FieldInfo CustomKey = HarmonyLib.AccessTools.Field(typeof(SpriteUpgradeChanger), "customKey");
 
         private static string PartKey(SpriteRenderer renderer)
@@ -87,6 +90,17 @@ namespace HalfGripObrez
                         break;
                 }
             }
+            if (body && gun.body)
+            {
+                aimBody = gun.body;
+                originalBodyCollider = aimBody.attachedCollider;
+                originalBodyColliderEnabled = originalBodyCollider && originalBodyCollider.enabled;
+                if (originalBodyCollider) originalBodyCollider.enabled = false;
+                // Broad zones follow the visible cut stock and fore-end, rather than the
+                // old SMG handle's small, offset hit box. Bolt priority stays higher.
+                aimBody.attachedCollider = AddAimZone("Obrez.StockGrip", 105, 29, 46, 30);
+                AddAimZone("Obrez.ForeEndGrip", 47, 20, 76, 20);
+            }
             if (body && handle && gun.slide)
             {
                 bolt = gun.slide;
@@ -95,7 +109,7 @@ namespace HalfGripObrez
                 boltAngle = bolt.anchorAngle;
                 boltMin = bolt.minLimit;
                 boltMax = bolt.maxLimit;
-                Vector3 target = PixelPoint(96, 18);
+                Vector3 target = PixelPoint(69, 18);
                 Vector3 delta = Vector3.ProjectOnPlane(target - handle.bounds.center, body.transform.forward);
                 Vector3 local = bolt.transform.parent.InverseTransformPoint(bolt.transform.position + delta);
                 // Pull toward the butt, not along the old SMG's unscaled slide axis/travel.
@@ -125,6 +139,22 @@ namespace HalfGripObrez
             else
                 Mod.Context.Log.LogInfo($"Obrez cockpit ready: gun width={owner.WorldWidth:0.###}, bolt travel={bolt.maxLimit:0.###}, camera={interiorCamera.name}");
             BuildHeld(gun);
+        }
+
+        private InteriorSquareCollider AddAimZone(string name, float column, float row, float width, float height)
+        {
+            GameObject zone = new GameObject(name);
+            owned.Add(zone);
+            zone.layer = body.gameObject.layer;
+            zone.transform.SetParent(body.transform, false);
+            zone.transform.position = PixelPoint(column, row);
+            float ppu = body.sprite.pixelsPerUnit;
+            InteriorSquareCollider collider = zone.AddComponent<InteriorSquareCollider>();
+            collider.width = width / ppu;
+            collider.height = height / ppu;
+            collider.hitBoxExpand = 4f / ppu;
+            collider.sortingLayer = originalBodyCollider ? originalBodyCollider.sortingLayer + 1 : 1;
+            return collider;
         }
 
         private Vector3 PixelPoint(float column, float row)
@@ -217,6 +247,8 @@ namespace HalfGripObrez
             }
             if (bolt) bolt.attachedCollider = originalBoltCollider;
             if (originalBoltCollider) originalBoltCollider.enabled = originalBoltColliderEnabled;
+            if (aimBody) aimBody.attachedCollider = originalBodyCollider;
+            if (originalBodyCollider) originalBodyCollider.enabled = originalBodyColliderEnabled;
             foreach (Object resource in owned) if (resource) Object.Destroy(resource);
             sprites.Clear(); renderers.Clear(); owned.Clear();
         }

@@ -56,5 +56,8 @@ Check(Math.Abs(320 / denser - 160 / ppu) < 0.001f, "A denser icon must not grow 
 Check(PresentationMath.NearReceiver(500, 300, 2, 500, 300, 8, 200), "Round and receiver at different depths must load when visually aligned");
 Check(!PresentationMath.NearReceiver(550, 300, 2, 500, 300, 8, 200), "A visibly distant round must not load");
 Check(!PresentationMath.NearReceiver(500, 300, -1, 500, 300, 8, 200), "A round behind the camera must not load");
+float garagePpu = PresentationMath.FitPixelDensity(64, 24, PresentationMath.GarageWidth, PresentationMath.GarageHeight);
+Check(Math.Abs(64 / garagePpu * 100 - 160) < 0.01f, "Independent 64px garage art must display at readable 160px width");
+Check(Math.Abs(24 / garagePpu * 100 - 60) < 0.01f, "Garage icon must fit a 60px high inventory row");
 Console.WriteLine($"PASS: {assertions} assertions: manual travel, open-bolt loading, five-round capacity, no auto-feed, and case ejection.");
 if (args.Length > 0) GameContracts.Check(args[0]);
