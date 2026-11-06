@@ -1,0 +1,50 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace HalfGripObrez
+{
+    internal static class ObrezItem
+    {
+        internal const string Id = "obrez.mosin";
+        private static GunUpgrade item;
+        internal static bool IsEquipped => item != null && PlayerStats.gunUpgrade == item;
+        internal static void Clear() => item = null;
+
+        internal static GunUpgrade Create(ItemCatalog catalog)
+        {
+            GunUpgrade basis = catalog.items.OfType<GunUpgrade>().FirstOrDefault(g => g && g.gunType == GunType.SMG_RIFLE);
+            if (!basis)
+            {
+                Mod.Context.Log.LogError("Cannot register Mosin Obrez: the catalog has no SMG item.");
+                return null;
+            }
+            GunUpgrade revolver = catalog.items.OfType<GunUpgrade>().FirstOrDefault(g => g && g.gunType == GunType.REVOLVER) ?? basis;
+            item = Mod.Context.Items.Clone(basis, Id);
+            item.name = "Mosin Obrez";
+            item.description = "Mosin Obrez\n<color=#7e7e7e>Short rifle. Long argument.</color>\n<color=#6fb7b4>Cycle the bolt after every shot</color>\n<color=#6fb7b4>5 rounds / heavy recoil / no scope</color>";
+            item.secondaryDescription = "";
+            item.tier = ItemTier.RaceSpec;
+            item.cost = Mathf.Max(basis.cost, revolver.cost) * 2;
+            item.disabled = false;
+            item.startsLocked = false;
+            item.damage = Mod.Damage.Value;
+            item.recoil = revolver.recoil * Mod.Recoil.Value;
+            item.inaccuracy = Mod.Inaccuracy.Value;
+            item.fireRate = 1.25f;
+            item.capacity = 5;
+            item.magazines = Mod.Packs.Value;
+            item.projectilesPerShot = 1;
+            item.projectileSpread = 0f;
+            item.ammoWord = "round|rounds";
+            item.muzzleFlash = revolver.muzzleFlash;
+            item.shakeIntensity = revolver.shakeIntensity * 1.2f;
+            item.shakeLength = revolver.shakeLength;
+            item.shakeSharpness = revolver.shakeSharpness;
+            item.forceHide = basis.forceHide != null ? new List<string>(basis.forceHide) : new List<string>();
+            item.forceHide.Add("fire rate");
+            item.image = Mod.Context.Sprites.LoadSprite("obrez_icon.png", basis.image) ?? basis.image;
+            return item;
+        }
+    }
+}

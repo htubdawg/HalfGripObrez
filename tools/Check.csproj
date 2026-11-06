@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>HalfGripMod.Obrez.Check</AssemblyName>
+    <ManagedDir>$(GameDir)/HalfGrip_Data/Managed</ManagedDir>
+  </PropertyGroup>
+  <Target Name="RequireReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(ManagedDir)/Assembly-CSharp.dll')" Text="Set GameDir to your Half Grip installation or private reference game folder." />
+    <Error Condition="!Exists('$(ToolsDll)')" Text="Set ToolsDll to HalfGripTools.dll (1.0.6 or later)." />
+  </Target>
+  <ItemGroup>
+    <Compile Include="../Obrez/src/**/*.cs" />
+    <Reference Include="$(ManagedDir)/*.dll" Exclude="$(ManagedDir)/mscorlib.dll;$(ManagedDir)/netstandard.dll;$(ManagedDir)/System*.dll"><Private>false</Private></Reference>
+    <Reference Include="$(GameDir)/BepInEx/core/BepInEx.dll"><Private>false</Private></Reference>
+    <Reference Include="$(GameDir)/BepInEx/core/0Harmony.dll"><Private>false</Private></Reference>
+    <Reference Include="$(ToolsDll)"><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>
