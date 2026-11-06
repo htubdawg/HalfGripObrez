@@ -7,7 +7,7 @@ namespace HalfGripObrez
 {
     internal sealed class ObrezPresentation
     {
-        internal const int Width = 128, Height = 48, BoreRow = 12, PortColumn = 62, PortRow = 12;
+        internal const int Width = 160, Height = 48, BoreRow = 8, PortColumn = 87, PortRow = 8;
         private readonly List<(SpriteRenderer renderer, Sprite original, Sprite replacement)> sprites = new();
         private readonly List<(Renderer renderer, bool enabled)> renderers = new();
         private readonly List<Object> owned = new();
@@ -78,7 +78,7 @@ namespace HalfGripObrez
                     case "smg_slide":
                     case "smg2_0":
                         handle = renderer;
-                        Swap(renderer, "obrez_bolt.png", owner.WorldWidth * 36f / Width);
+                        Swap(renderer, "obrez_bolt.png", owner.WorldWidth * 48f / Width);
                         break;
                     case "smg_backside":
                     case "smg_slide_2":
@@ -98,8 +98,8 @@ namespace HalfGripObrez
                 if (originalBodyCollider) originalBodyCollider.enabled = false;
                 // Broad zones follow the visible cut stock and fore-end, rather than the
                 // old SMG handle's small, offset hit box. Bolt priority stays higher.
-                aimBody.attachedCollider = AddAimZone("Obrez.StockGrip", 105, 29, 46, 30);
-                AddAimZone("Obrez.ForeEndGrip", 47, 20, 76, 20);
+                aimBody.attachedCollider = AddAimZone("Obrez.StockGrip", 132, 27, 56, 30);
+                AddAimZone("Obrez.ForeEndGrip", 67, 18, 106, 24);
             }
             if (body && handle && gun.slide)
             {
@@ -109,7 +109,7 @@ namespace HalfGripObrez
                 boltAngle = bolt.anchorAngle;
                 boltMin = bolt.minLimit;
                 boltMax = bolt.maxLimit;
-                Vector3 target = PixelPoint(69, 18);
+                Vector3 target = PixelPoint(93, 14);
                 Vector3 delta = Vector3.ProjectOnPlane(target - handle.bounds.center, body.transform.forward);
                 Vector3 local = bolt.transform.parent.InverseTransformPoint(bolt.transform.position + delta);
                 // Pull toward the butt, not along the old SMG's unscaled slide axis/travel.

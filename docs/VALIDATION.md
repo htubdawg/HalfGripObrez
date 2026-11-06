@@ -1,4 +1,4 @@
-# Validation for 0.2.2
+# Validation for 0.2.3
 
 ## Changes prompted by 0.1.0 playtesting
 
@@ -19,6 +19,12 @@ The first prototype's loading packs were oversized, its bolt used the SMG return
 - Padded stock and fore-end aiming zones on the body Grabbable, with higher priority reserved for the bolt. All original collider references and enabled states are restored during cleanup.
 - Dedicated 8×28 cartridge drawing with brass case, shoulder, neck, pointed copper bullet, and smaller relative rim. Display height rises from 12% to 17% of gun length; spacing and hit areas follow the size.
 
+## 0.2.3 visibility fix and art replacement
+
+- Inspected the native `Gun.ExitAimMode`: it enables every child `SpriteRenderer` under `spriteParents`. This re-enabled the converted ammo prefab's original empty-magazine image after a shot/lower cycle.
+- The unused empty renderer now has `sprite = null`, rather than merely being disabled once. A scoped exit-aim postfix and per-round `LateUpdate` restore the intended cartridge-only visibility. The loaded renderer also receives its owned cartridge sprite explicitly, and respects aiming/consumed state. Cleanup restores the original magazine art.
+- The rejected drawing is replaced with a 160×48 curved stock silhouette, more restrained walnut shading, cylindrical steel bolt, and shallow magazine/rounded trigger guard. The 48×22 moving bolt, receiver target and body grab zones use updated coordinates. Garage art remains separately authored at 64×24.
+
 ## Automated checks
 
 - C# 10 / .NET Standard 2.1 compilation against the private Half Grip 0.419 assemblies, BepInEx, Harmony, and HalfGripTools 1.0.6: zero errors and zero warnings.
@@ -27,17 +33,18 @@ The first prototype's loading packs were oversized, its bolt used the SMG return
 - Presentation math tests check that PNG resolution does not grow the garage icon and that visually aligned rounds at different depths can reach the receiver.
 - Metadata checks verify the native private methods and fields used by the gun/rack hooks, including the chamber setter and rack inventory references.
 - Generated assets are checked for repeatability and valid PNG structure. The preview shows the cartridge at the intended relative scale.
+- Cartridge visibility fix is verified by source inspection and compilation; the actual after-shot rendered scene still needs the regression check below.
 - Install package integrity and contents checked; no game DLLs or build outputs included.
 
-No Unity/game runtime was available to playtest 0.2.2. Compilation and state tests do not establish cockpit alignment or the behavior of the hand/physics system in the game.
+No Unity/game runtime was available to playtest 0.2.3. Compilation and state tests do not establish cockpit alignment or the behavior of the hand/physics system in the game.
 
 ## In-game checklist
 
-1. Install 0.2.2 with HalfGripTools 1.0.6+ on Half Grip 0.419. Confirm all patches load and `obrez.mosin` appears once. Test an existing Obrez loadout save.
+1. Install 0.2.3 with HalfGripTools 1.0.6+ on Half Grip 0.419. Confirm all patches load and `obrez.mosin` appears once. Test an existing Obrez loadout save.
 2. In the garage, confirm that the simplified icon fills a useful portion of the gun slot without crowding adjacent items. Compare gun, bolt, and cartridge size on several cars. A loose cartridge should be about one sixth of the rifle length. Check the shop icon, bolt hit area, ammo hit areas, and held muzzle alignment.
 3. With a chambered round, grab different parts of the visible cut stock and fore-end: they should enter aiming mode without pixel hunting. Confirm that directly grabbing the bolt still selects the bolt instead of aiming. Pull the bolt fully back and let go. It must remain open. Repeat with a partial pull/release; it must not spring closed or coast. Manually push it fully forward to close.
 4. With the bolt open, drag a single cartridge into the receiver. It should seat without moving the bolt. Load five; a sixth must remain available outside the gun. Close manually and verify only one round chambers.
-5. Fire five rounds, cycling the bolt manually after every shot. Verify five total shots, one case per full opening, and no automatic feeding or automatic repeated fire.
+5. Fire once and lower/raise the gun repeatedly: none of the remaining cartridges may show a full or empty SMG magazine underneath, including after a reskin/refit of unrelated equipment. Then fire all five rounds, cycling the bolt manually after every shot. Verify five total shots, one case per full opening, and no automatic feeding or automatic repeated fire.
 6. Close the bolt while a cartridge is animating in; confirm the round is not consumed. Try a partial close, two cartridges in rapid succession, loading with the bolt closed, and loading a full magazine.
 7. Test shots during cooldown, with partial bolt travel, with an empty chamber, and during the opening ceasefire. None should consume ammunition improperly.
 8. Start with an old config containing 15 rounds: it must supply five. A fresh config must also supply five; setting four must supply four. Extra-magazine upgrades, kills, pickups and refill effects must not add rounds. Drop an unspent round and verify native recovery. Infinite-ammo debug mode remains a cheat.

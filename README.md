@@ -1,6 +1,6 @@
 # Mosin Obrez for Half Grip
 
-A cut-down Mosin-Nagant with **individual cartridges, a five-round internal magazine, and a bolt the player opens and closes by hand**. Version **0.2.2** redraws the gun from the supplied reference photo, adds a separate low-detail garage icon, broadens the aiming grip, and enlarges/redraws the cartridges. The revision still needs in-game playtesting.
+A cut-down Mosin-Nagant with **individual cartridges, a five-round internal magazine, and a bolt the player opens and closes by hand**. Version **0.2.3** fixes the stock SMG magazine image reappearing after firing/lowering, and replaces the rejected gun drawing with a curved stock profile, restrained walnut shading, a cylindrical bolt, and a smaller rounded magazine/trigger guard. The revision still needs in-game playtesting.
 
 ![Generated Mosin artwork and cartridge](docs/artwork.png)
 
@@ -38,11 +38,15 @@ The garage uses a separately drawn **64×24** pixel sprite with broad shapes and
 
 Docked length is measured from the stock gun's actual world-space width. Body, bolt, and cartridge sprites get separate pixel densities that account for their own cockpit transforms. A cartridge's height is 17% of the docked gun's length; it does not inherit the size of the old SMG magazine. Cartridge hit areas are also resized. The bolt's travel is 14% of gun length along the barrel axis. Its cylinder, handle and cocking piece form one moving sprite; the grab collider is centred on that sprite. Hand motion stays unfrozen, with zero springs and zero release momentum.
 
-The supplied photo guides the thick wooden fore-end, curved wrist, flared cut stock, short barrel/front sight, leaf rear sight, and shallow sloped magazine. The bolt stays on the side used in 0.2.1. Cockpit, held, garage, and cartridge textures have distinct drawing functions; the held texture has its own face highlights.
+The supplied photo guides a 160×48 cockpit drawing: a deep wooden fore-end, smoothly curved wrist, short flared cut stock, front/leaf rear sights, cylindrical bolt, shallow sloped magazine, and rounded trigger guard. Stock contours are sampled from curves, with a restrained walnut palette and lengthwise grain rather than stacked rectangles. The bolt stays on the side used in 0.2.1. Cockpit, held, garage, and cartridge textures have distinct drawing functions; the held texture has its own face highlights.
 
 The aiming grab area covers the visible stock and fore-end with padded colliders, replacing the offset SMG handle area. The moving bolt keeps higher selection priority, so clicking it still operates the action. The body and bolt's original colliders are restored on unload/refit.
 
 Loose rounds are 42% taller than 0.2.1 and have a longer brass case, a defined shoulder/neck, a pointed copper projectile, and a restrained rim. The rack spacing and grab shapes follow their size.
+
+## Cartridge visibility
+
+The base game hides all child sprites while aiming, then enables every child sprite when the gun lowers. That includes the original SMG empty-magazine layer retained in the converted ammo prefab. Version 0.2.3 clears that layer's drawable sprite while the Obrez is equipped, reapplies cartridge visibility immediately after lowering, and maintains it in `LateUpdate`. Loaded cartridge art remains hidden while aiming and consumed rounds stay hidden. Original sprites are retained for cleanup/refits.
 
 ## Configuration
 
@@ -69,7 +73,7 @@ python3 tools/make_assets.py
 python3 tools/package.py
 ```
 
-The package is `dist/HalfGripObrez-0.2.2.zip`. It contains the installable source mod and documentation, with no game assemblies.
+The package is `dist/HalfGripObrez-0.2.3.zip`. It contains the installable source mod and documentation, with no game assemblies.
 
 Compile with .NET 8 and local private references:
 

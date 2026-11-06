@@ -2,6 +2,17 @@ using HarmonyLib;
 
 namespace HalfGripObrez
 {
+    [HarmonyPatch(typeof(Gun), "ExitAimMode")]
+    internal static class LoweredAmmoVisibilityPatch
+    {
+        private static void Postfix(Gun __instance)
+        {
+            if (!__instance.GetComponent<ObrezGun>()) return;
+            foreach (ObrezRound round in UnityEngine.Object.FindObjectsByType<ObrezRound>(
+                UnityEngine.FindObjectsInactive.Include, UnityEngine.FindObjectsSortMode.None))
+                if (round.SourceGun == __instance) round.RefreshVisibility();
+        }
+    }
     // Any equipment refit refreshes all native sprites, even when the gun item did not change.
     [HarmonyPatch(typeof(SpriteUpgradeChanger), "Refresh")]
     internal static class SpriteRefreshPatch

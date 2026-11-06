@@ -162,6 +162,7 @@ namespace HalfGripObrez
         private Sprite art;
         private ObrezGun target;
         private bool inserting, consumed;
+        private bool presentationReady;
         private float elapsed;
         private Vector3 fromPosition;
         private Quaternion fromRotation;
@@ -180,8 +181,8 @@ namespace HalfGripObrez
             Loaded.transform.localPosition = Vector3.zero;
             art = ObrezPresentation.SizedSprite("obrez_round.png", Loaded, height, true);
             if (art) Loaded.sprite = art;
-            Loaded.enabled = true;
-            if (Empty) Empty.enabled = false;
+            presentationReady = true;
+            RefreshVisibility();
             if (attachedCollider)
                 attachedCollider.hitBoxExpand = height * 0.08f / attachedCollider.transform.TransformVector(Vector3.up).magnitude;
             if (attachedCollider is InteriorSquareCollider box)
@@ -243,11 +244,28 @@ namespace HalfGripObrez
         }
         internal void Reapply(SpriteRenderer renderer)
         {
-            if (renderer == Loaded && art) renderer.sprite = art;
-            if (renderer == Empty) renderer.enabled = false;
+            if (renderer == Loaded || renderer == Empty) RefreshVisibility();
         }
+        internal void RefreshVisibility()
+        {
+            if (!presentationReady) return;
+            if (Loaded)
+            {
+                Loaded.sprite = art;
+                Loaded.enabled = art && !consumed && !(SourceGun && SourceGun.grabbed);
+            }
+            if (Empty)
+            {
+                // Gun.ExitAimMode turns every child SpriteRenderer back on. Disabling
+                // this stock layer once is insufficient: remove its drawable sprite too.
+                Empty.sprite = null;
+                Empty.enabled = false;
+            }
+        }
+        private void LateUpdate() => RefreshVisibility();
         internal void RestoreArt()
         {
+            presentationReady = false;
             Cancel();
             if (Loaded) { Loaded.sprite = OriginalLoaded; Loaded.transform.localPosition = OriginalArtPosition; Loaded.enabled = true; }
             if (Empty) { Empty.sprite = OriginalEmpty; Empty.enabled = false; }
