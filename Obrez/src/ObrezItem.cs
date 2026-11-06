@@ -8,8 +8,14 @@ namespace HalfGripObrez
     {
         internal const string Id = "obrez.mosin";
         private static GunUpgrade item;
+        private static Sprite icon;
         internal static bool IsEquipped => item != null && PlayerStats.gunUpgrade == item;
-        internal static void Clear() => item = null;
+        internal static void Clear()
+        {
+            item = null;
+            if (icon) Object.Destroy(icon);
+            icon = null;
+        }
 
         internal static GunUpgrade Create(ItemCatalog catalog)
         {
@@ -43,7 +49,17 @@ namespace HalfGripObrez
             item.shakeSharpness = revolver.shakeSharpness;
             item.forceHide = basis.forceHide != null ? new List<string>(basis.forceHide) : new List<string>();
             item.forceHide.Add("fire rate");
-            item.image = Mod.Context.Sprites.LoadSprite("obrez_icon.png", basis.image) ?? basis.image;
+            Texture2D texture = Mod.Context.Sprites.LoadTexture("obrez_icon.png");
+            if (texture && basis.image)
+            {
+                // The garage calls Image.SetNativeSize, which uses sprite bounds/PPU.
+                // Fit inside the stock icon footprint regardless of the PNG resolution.
+                Vector2 size = basis.image.bounds.size;
+                float ppu = PresentationMath.FitPixelDensity(texture.width, texture.height, size.x * 0.75f, size.y * 0.75f);
+                icon = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), ppu);
+                icon.name = "obrez_shop_icon";
+                item.image = icon;
+            }
             return item;
         }
     }

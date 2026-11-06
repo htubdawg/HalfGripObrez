@@ -42,7 +42,19 @@ namespace HalfGripObrez
     {
         private static void Prefix(MagazineManager __instance)
         {
-            if (ObrezItem.IsEquipped) ObrezAmmo.ConvertRack(__instance);
+            if (ObrezItem.IsEquipped) ObrezAmmo.ConvertRack(__instance, true);
+        }
+    }
+    // Four/five shots total from the initial supply. Native extra-magazine upgrades,
+    // kills, pickups and refill effects must not multiply it into stacks of ammunition.
+    [HarmonyPatch(typeof(MagazineManager), "SpawnEntities")]
+    internal static class SupplyPatch
+    {
+        private static bool Prefix(MagazineManager __instance, ref int __result)
+        {
+            if (!__instance.GetComponent<ObrezRack>()) return true;
+            __result = 0;
+            return false;
         }
     }
     [HarmonyPatch(typeof(NAutomaticGun), "UpdateSlide")]

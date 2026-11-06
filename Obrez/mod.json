@@ -1,9 +1,9 @@
 {
   "id": "obrez",
   "name": "Mosin Obrez",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Codex - Oretsej",
-  "description": "A cut-down Mosin with a manually opened and closed bolt, an internal five-round magazine, and individual cartridges. Code-generated Mosin artwork and matched cockpit scaling.",
+  "description": "A five-shot Mosin Obrez with loose cartridges, a hand-operated bolt, and a compact garage icon.",
   "gameVersion": "0.419",
   "tools": "1.0.6"
 }

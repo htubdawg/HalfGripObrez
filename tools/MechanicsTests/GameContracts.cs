@@ -30,7 +30,7 @@ internal static class GameContracts
             { if (!fieldNames.Contains(name)) throw new Exception($"Missing native field: {typeName}.{name}"); checks++; }
         }
         Require("NAutomaticGun", ["Awake", "UpdateSlide", "Shoot", "TryChamber", "ShotsLeft", "RegisterTutorial", "set_chambered"], []);
-        Require("MagazineManager", ["Awake", "FitAuthoredCount"], ["items", "slots", "returning"]);
+        Require("MagazineManager", ["Awake", "FitAuthoredCount", "SpawnEntities"], ["items", "slots", "returning"]);
         Require("LoadoutRefit", ["Swap"], []);
         Require("SpriteUpgradeChanger", ["Refresh"], []);
         Require("Gun", ["ExitAimMode"], []);

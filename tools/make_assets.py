@@ -71,10 +71,6 @@ def rifle(with_bolt=False):
     c.rect(78, 10, 22, 1, 'light')
     c.rect(80, 12, 13, 3, 'edge')  # Small open receiver/loading port.
     c.rect(80, 15, 15, 1, 'light')
-    c.rect(95, 11, 9, 3, 'shine')  # Bolt body, distinct from receiver.
-    c.rect(104, 10, 5, 6, 'steel')
-    c.rect(105, 9, 3, 8, 'edge')  # Round Mosin cocking knob.
-    c.rect(105, 10, 3, 5, 'light')
     # Stock continues under the receiver into a shallow, tapered cut wrist.
     for y in range(17, 30):
         left = 80 + max(0, y - 22)
@@ -97,10 +93,24 @@ def rifle(with_bolt=False):
     c.rect(97, 24, 11, 6, (0, 0, 0, 0))
     c.rect(99, 23, 2, 5, 'steel')
     if with_bolt:
-        c.rect(96, 12, 2, 10, 'light')
-        c.rect(93, 20, 7, 6, 'edge')
-        c.rect(94, 20, 5, 4, 'steel')
-        c.rect(94, 20, 3, 2, 'shine')
+        c.paste(bolt_art(), 78, 8)
+    return c
+
+
+def bolt_art():
+    # Complete moving bolt, not just its handle. Origin corresponds to body pixel (78, 8).
+    c = Canvas(36, 20)
+    c.rect(0, 2, 27, 6, 'edge')
+    c.rect(1, 2, 25, 4, 'steel')
+    c.rect(1, 2, 24, 1, 'shine')
+    c.rect(3, 4, 21, 1, 'light')
+    c.rect(26, 1, 5, 8, 'edge')
+    c.rect(27, 2, 3, 5, 'light')
+    c.rect(18, 4, 3, 11, 'edge')
+    c.rect(19, 4, 1, 11, 'light')
+    c.rect(16, 13, 7, 6, 'edge')
+    c.rect(17, 13, 5, 4, 'steel')
+    c.rect(17, 13, 3, 2, 'shine')
     return c
 
 
@@ -109,12 +119,7 @@ def generate():
     body, held = rifle(), rifle(True)
     body.save(sprites / 'obrez_body.png')
     held.save(sprites / 'obrez_held.png')
-    bolt = Canvas(16, 14)
-    bolt.rect(6, 0, 3, 10, 'edge')
-    bolt.rect(7, 0, 1, 10, 'light')
-    bolt.rect(4, 9, 7, 5, 'edge')
-    bolt.rect(5, 9, 5, 4, 'steel')
-    bolt.rect(5, 9, 3, 2, 'shine')
+    bolt = bolt_art()
     bolt.save(sprites / 'obrez_bolt.png')
     cartridge = Canvas(6, 16)
     cartridge.rect(2, 0, 1, 3, 'copper')

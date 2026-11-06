@@ -48,5 +48,13 @@ Check(interrupted.ReserveRound(), "Open receiver must reserve a round");
 Move(interrupted, 0f);
 Check(!interrupted.FinishRound(false) && interrupted.LiveRounds == 0, "Closing during insertion must leave the physical round unconsumed");
 Check(!interrupted.PendingRound, "Interrupted insertion must release the reservation");
+// Garage icon uses Image.SetNativeSize; PNG resolution must not change its displayed footprint.
+float ppu = PresentationMath.FitPixelDensity(160, 80, 15, 9);
+Check(160 / ppu <= 15.001f && 80 / ppu <= 9.001f, "Garage icon must fit both stock footprint dimensions");
+float denser = PresentationMath.FitPixelDensity(320, 160, 15, 9);
+Check(Math.Abs(320 / denser - 160 / ppu) < 0.001f, "A denser icon must not grow in the garage");
+Check(PresentationMath.NearReceiver(500, 300, 2, 500, 300, 8, 200), "Round and receiver at different depths must load when visually aligned");
+Check(!PresentationMath.NearReceiver(550, 300, 2, 500, 300, 8, 200), "A visibly distant round must not load");
+Check(!PresentationMath.NearReceiver(500, 300, -1, 500, 300, 8, 200), "A round behind the camera must not load");
 Console.WriteLine($"PASS: {assertions} assertions: manual travel, open-bolt loading, five-round capacity, no auto-feed, and case ejection.");
 if (args.Length > 0) GameContracts.Check(args[0]);

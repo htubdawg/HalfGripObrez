@@ -9,7 +9,7 @@ namespace HalfGripObrez
 {
     internal static class ObrezAmmo
     {
-        internal static void ConvertRack(MagazineManager rack)
+        internal static void ConvertRack(MagazineManager rack, bool initial = false)
         {
             bool converted = false;
             foreach (NMagazine magazine in rack.GetComponentsInChildren<NMagazine>(true))
@@ -19,8 +19,44 @@ namespace HalfGripObrez
             {
                 ObrezRack saved = rack.gameObject.AddComponent<ObrezRack>();
                 saved.OriginalEntities = rack.entitiesPerMagazine;
-                rack.entitiesPerMagazine = BoltAction.Capacity;
+                rack.entitiesPerMagazine = 1;
             }
+            if (converted && initial) BuildStartingSupply(rack);
+        }
+
+        private static void BuildStartingSupply(MagazineManager rack)
+        {
+            // Build actual loose-round entities before the native rack records its slots.
+            // The SMG rack can be a sibling of the gun, so its Owner()/FitAuthoredCount
+            // cannot reliably apply the item's magazine count for us.
+            var rounds = new List<ObrezRound>(rack.GetComponentsInChildren<ObrezRound>(true));
+            if (rounds.Count == 0) return;
+            int count = Mod.Rounds.Value;
+            Vector3 start = rounds[0].transform.position;
+            Vector3 end = rounds[rounds.Count - 1].transform.position;
+            Vector3 direction = end - start;
+            Vector3 centre = (start + end) * 0.5f;
+            float width = ObrezPresentation.MeasureWidth(rounds[0].SourceGun) * Mod.DockScale.Value;
+            float span = Mathf.Max(direction.magnitude, width * 0.075f * (count - 1));
+            direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : rack.transform.right;
+            while (rounds.Count > count)
+            {
+                ObrezRound extra = rounds[rounds.Count - 1];
+                rounds.RemoveAt(rounds.Count - 1);
+                Object.DestroyImmediate(extra.gameObject);
+            }
+            while (rounds.Count < count)
+            {
+                GameObject made = Object.Instantiate(rounds[0].gameObject, rounds[0].transform.parent);
+                rounds.Add(made.GetComponent<ObrezRound>());
+            }
+            for (int i = 0; i < rounds.Count; i++)
+            {
+                Transform t = rounds[i].transform;
+                t.position = centre + direction * (span * ((float)i / (count - 1) - 0.5f));
+                rounds[i].ResetRestPose(t.localPosition, t.localRotation);
+            }
+            Mod.Context.Log.LogInfo("Obrez starting supply: " + rounds.Count + " individual rounds (no extra magazines).");
         }
 
         internal static void Convert(NMagazine magazine)
@@ -182,7 +218,7 @@ namespace HalfGripObrez
             if (!target || !target.Ready) { Cancel(); return; }
             elapsed += InteriorMath.DeltaTime;
             float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / 0.18f));
-            Vector3 receiver = PlaneToWorld(WorldToPlane(target.Visuals.Receiver));
+            if (!target.Visuals.LoadingPosition(this, out Vector3 receiver)) { Cancel(); return; }
             Quaternion rotation = Quaternion.FromToRotation(fromRotation * Vector3.up, target.Visuals.AlongBarrel) * fromRotation;
             transform.position = Vector3.Lerp(fromPosition, receiver, t);
             transform.rotation = Quaternion.Slerp(fromRotation, rotation, t);

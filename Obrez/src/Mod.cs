@@ -19,13 +19,15 @@ namespace HalfGripObrez
                 new ConfigDescription("Spread in degrees; the short barrel trades accuracy for size.", new AcceptableValueRange<float>(0f, 15f)));
             Recoil = ctx.Config.Bind("Obrez", "RecoilMultiplier", 1.4f,
                 new ConfigDescription("Recoil relative to the revolver.", new AcceptableValueRange<float>(0.1f, 5f)));
-            Rounds = ctx.Config.Bind("Obrez", "LooseRounds", 15,
-                new ConfigDescription("Individual cartridges on the rack at race start.", new AcceptableValueRange<int>(5, 60)));
+            Rounds = ctx.Config.Bind("Obrez", "LooseRounds", 5,
+                new ConfigDescription("Total individual cartridges supplied at race start (four or five).", new AcceptableValueRange<int>(4, 5)));
+            // Existing 0.2 configs contain 15; migrate them instead of retaining the broken ammo balance.
+            Rounds.Value = Mathf.Clamp(Rounds.Value, 4, 5);
             DockScale = ctx.Config.Bind("Obrez", "DockScale", 1f,
                 new ConfigDescription("Docked gun length relative to the stock SMG. Cartridges and bolt use the same physical scale.", new AcceptableValueRange<float>(0.5f, 1.5f)));
             ctx.Items.Add(ObrezItem.Id, ObrezItem.Create);
             ctx.PatchAll();
-            ctx.Log.LogInfo("Mosin Obrez 0.2.0 loaded: loose rounds and a manually opened/closed bolt.");
+            ctx.Log.LogInfo("Mosin Obrez 0.2.1 loaded: five-shot supply and manual bolt.");
         }
 
         public override void Unload()

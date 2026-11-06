@@ -21,6 +21,7 @@ namespace HalfGripObrez
         private AudioClip[] sounds;
         private bool boltPhysics, boltFrozen;
         private float boltSpring, boltPhysicsSpring, boltMomentum;
+        private System.Func<Grabbable> boltRedirect;
         private bool Ceasefire => race && race.InOpeningCeasefire;
         private bool Endless => global::Gun.infiniteAmmo || global::Gun.godGun;
 
@@ -46,11 +47,9 @@ namespace HalfGripObrez
                 boltSpring = gun.slide.objectSpringForce;
                 boltPhysicsSpring = gun.slide.physicsObjectSpringForce;
                 boltMomentum = gun.slide.directSpeedKeptOnRelease;
-                gun.slide.isPhysicsControlled = false;
-                gun.slide.objectSpringForce = 0f;
-                gun.slide.physicsObjectSpringForce = 0f;
-                gun.slide.directSpeedKeptOnRelease = 0f;
-                gun.slide.onReleased.AddListener(HoldBolt);
+                boltRedirect = gun.slide.grabRedirect;
+                BoltControl.Configure(gun.slide);
+                gun.slide.onGrabbed.AddListener(GrabBolt);
             }
             SetChamber.Invoke(gun, new object[] { false });
             initialized = true;
@@ -63,16 +62,18 @@ namespace HalfGripObrez
                 { Gun.shootSounds = candidate.shootSounds; break; }
             Visuals = new ObrezPresentation(this);
         }
-        private void HoldBolt()
+        private void GrabBolt()
         {
-            if (Gun && Gun.slide) Gun.slide.frozen = true;
+            if (Gun && Gun.slide) Gun.slide.frozen = false;
         }
         // Replaces the SMG's UpdateSlide, including its unconditional return spring.
         internal void UpdateBolt()
         {
             if (!initialized || !Gun.slide) return;
             LinearObject bolt = Gun.slide;
-            bolt.frozen = !bolt.IsGrabbed;
+            // Zero springs and zero release momentum hold the last position. Freezing the
+            // Grabbable interferes with the native hand's movement/pose update.
+            bolt.frozen = false;
             bolt.targetValue = bolt.value;
             BoltEvent change = Action.MoveBolt(bolt.value, Gun.slideBackThreshold, Gun.slideForwardThreshold);
             if (change == BoltEvent.Opened || change == BoltEvent.Ejected)
@@ -147,7 +148,8 @@ namespace HalfGripObrez
                 SetChamber.Invoke(Gun, new object[] { false });
                 if (Gun.slide)
                 {
-                    Gun.slide.onReleased.RemoveListener(HoldBolt);
+                    Gun.slide.onGrabbed.RemoveListener(GrabBolt);
+                    Gun.slide.grabRedirect = boltRedirect;
                     Gun.slide.isPhysicsControlled = boltPhysics;
                     Gun.slide.objectSpringForce = boltSpring;
                     Gun.slide.physicsObjectSpringForce = boltPhysicsSpring;
